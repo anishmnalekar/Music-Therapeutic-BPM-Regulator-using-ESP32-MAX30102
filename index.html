@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Music & BPM Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 680px; margin: 24px auto; padding: 0 12px; }
+    h1 { margin-bottom: 4px; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0; }
+    button, select { padding:10px 14px; border-radius:10px; border:1px solid #ddd; cursor:pointer; }
+    .card { padding:12px 14px; border:1px solid #eee; border-radius:14px; margin:10px 0; }
+    #log { white-space:pre-wrap; background:#fafafa; border-radius:10px; padding:10px; border:1px dashed #ddd; min-height:60px; }
+  </style>
+</head>
+<body>
+  <h1>Music Therapeutic BPM Regulator</h1>
+  <p>Select a genre, start BPM reading, then start music. Music auto-stops after 60s if you don’t press Stop.</p>
+
+  <div class="card">
+    <div class="row">
+      <button id="btnStartBpm">Start BPM</button>
+      <button id="btnAfterBpm">Measure BPM After</button>
+    </div>
+    <div>BPM Before: <b id="bpmBefore">—</b> &nbsp; | &nbsp; BPM After: <b id="bpmAfter">—</b></div>
+  </div>
+
+  <div class="card">
+    <label for="genre">Genre:</label>
+    <select id="genre">
+      <option value="calm">Calm</option>
+      <option value="energetic">Energetic</option>
+      <option value="neutral">Neutral</option>
+    </select>
+    <div class="row">
+      <button id="btnStartMusic">Start (Shuffle)</button>
+      <button id="btnNextMusic">Next ▶▶</button>
+      <button id="btnStopMusic">Stop</button>
+      <button id="btnResumeMusic">Resume</button>
+    </div>
+    <small>Tracks are shuffled per genre. Press Next to skip. Auto-stops after 60s.</small>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="btnFeedbackGood">Mood Improved 👍</button>
+      <button id="btnFeedbackBad">Not Improved 👎</button>
+    </div>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const bpmBeforeEl = document.getElementById('bpmBefore');
+    const bpmAfterEl  = document.getElementById('bpmAfter');
+
+    function log(msg){ logEl.textContent = (new Date().toLocaleTimeString()) + " — " + msg + "\n" + logEl.textContent; }
+
+    document.getElementById('btnStartBpm').onclick = async () => {
+      try {
+        const r = await fetch('/start'); const j = await r.json();
+        bpmBeforeEl.textContent = j.bpm ?? '—';
+        log('BPM Before: ' + j.bpm);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnAfterBpm').onclick = async () => {
+      try {
+        const r = await fetch('/after'); const j = await r.json();
+        bpmAfterEl.textContent = j.bpm ?? '—';
+        log('BPM After: ' + j.bpm);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnStartMusic').onclick = async () => {
+      const genre = document.getElementById('genre').value;
+      try {
+        const r = await fetch('/start_music?genre=' + encodeURIComponent(genre));
+        const t = await r.text();
+        log('Start music: ' + t);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnNextMusic').onclick = async () => {
+      try {
+        const r = await fetch('/next_music');
+        const t = await r.text();
+        log('Next: ' + t);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnStopMusic').onclick = async () => {
+      try {
+        const r = await fetch('/stop_music');
+        const t = await r.text();
+        log('Stop music: ' + t);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnResumeMusic').onclick = async () => {
+      try {
+        const r = await fetch('/resume_music');
+        const t = await r.text();
+        log('Resume music: ' + t);
+      } catch(e){ log('Error: ' + e); }
+    };
+
+    document.getElementById('btnFeedbackGood').onclick = async () => {
+      try { await fetch('/feedback?mood=good'); log('Feedback sent: good'); } catch(e){}
+    };
+    document.getElementById('btnFeedbackBad').onclick = async () => {
+      try { await fetch('/feedback?mood=bad'); log('Feedback sent: bad'); } catch(e){}
+    };
+  </script>
+</body>
+</html>
+
