@@ -143,10 +143,10 @@ sta_if.connect('YOUR_WIFI_NAME', 'YOUR_PASSWORD')
 
 #Author
 
-**Anish Nalekar**  
+**Anish Nalekar**   
 MSc Computer Science
 
-**Sanika Kambli**
+**Sanika Kambli**    
 MSc Bioinformatics
 
 ---
